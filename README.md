@@ -57,7 +57,7 @@
 
 > 🖼️ *The Blue Edition interface — sleek, dark, and electrifying.*
 > <br/>
-> <sub>If the image doesn't load, upload your screenshot to <code>/assets/dcrypted-preview.png</code>.</sub>
+> 
 
 </div>
 
