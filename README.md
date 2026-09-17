@@ -46,14 +46,8 @@
 
 ## 📸 &nbsp; P R E V I E W
 
-<!-- 
-  ⚠️ IMPORTANT — replace the src below with your own uploaded image path:
-  1. Download the image from your ChatGPT share link.
-  2. Upload it to your repo (e.g. → assets/dcrypted-preview.png).
-  3. Update the src attribute accordingly.
--->
 
-<img src="assets/dcrypted-preview.png"
+<img src="https://raw.githubusercontent.com/0xTestbuild/d-crip-ted/main/assets/dcrypted-preview.png"
      alt="D-Crip-Ted Blue Edition — Full Interface Preview"
      width="92%"
      style="border-radius:16px;border:2px solid #087dff;box-shadow:0 0 45px rgba(0,112,255,.45);"/>
