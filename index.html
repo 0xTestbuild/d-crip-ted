@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>D-Crip-Ted | Blue Edition</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600;700&family=UnifrakturCook:wght@700&display=swap');
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:#020916;color:#dcecff;font-family:"Roboto Mono",monospace;overflow:hidden}
+    body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(1,8,20,.55),rgba(1,8,20,.94)),url("assets/blue_converter_theme.png") center/cover no-repeat;filter:saturate(1.15);z-index:-2}
+    body:after{content:"";position:fixed;inset:0;background:radial-gradient(circle at 50% 25%,rgba(0,112,255,.18),transparent 42%);z-index:-1;pointer-events:none}
+    .app{width:min(1500px,96vw);height:94vh;margin:3vh auto;border:1px solid #087dff;border-radius:16px;background:rgba(2,10,25,.86);box-shadow:0 0 45px rgba(0,112,255,.28),inset 0 0 35px rgba(0,70,180,.08);overflow:hidden;backdrop-filter:blur(5px)}
+    .topbar{height:64px;display:flex;align-items:center;gap:18px;padding:0 22px;border-bottom:1px solid #075cc4;background:rgba(2,13,32,.92)}
+    .logo{font-family:"UnifrakturCook",serif;font-size:42px;color:#168cff;text-shadow:0 0 14px #006cff}
+    .brand{font-weight:700;font-size:20px;letter-spacing:2px}
+    .badge{margin-left:auto;color:#168cff;font-size:13px;letter-spacing:2px}
+    .window button{width:34px;height:30px;margin-left:7px;background:#061c3c;color:#9ccfff;border:1px solid #075cc4;border-radius:5px;cursor:pointer}
+    .layout{display:grid;grid-template-columns:210px 1fr;height:calc(100% - 64px)}
+    nav{border-right:1px solid #075cc4;padding:20px 12px;background:rgba(2,12,29,.82)}
+    nav button{width:100%;padding:16px 12px;margin-bottom:8px;text-align:left;color:#8db9ea;background:transparent;border:1px solid transparent;border-radius:8px;font:600 13px "Roboto Mono";cursor:pointer}
+    nav button.active,nav button:hover{color:white;background:#05255a;border-color:#087dff;box-shadow:0 0 18px rgba(0,125,255,.18)}
+    .main{padding:26px;overflow:auto}
+    .hero{text-align:center;margin-bottom:22px}
+    .hero h1{margin:0;font-family:"UnifrakturCook",serif;font-size:72px;color:#168cff;text-shadow:0 0 25px #006cff}
+    .hero .rule{font-size:20px;letter-spacing:7px;color:#e7f3ff}
+    .hero p{color:#65a8ef;letter-spacing:2px}
+    .workspace{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .panel{border:1px solid #087dff;border-radius:12px;background:rgba(2,15,36,.9);box-shadow:inset 0 0 25px rgba(0,92,210,.08)}
+    .panelhead{padding:14px 17px;border-bottom:1px solid #064b9e;display:flex;justify-content:space-between}
+    .panelhead strong{color:#62adff}
+    .counter{font-size:11px;color:#508bc5}
+    textarea{width:100%;height:300px;resize:none;border:0;outline:0;background:#020b1c;color:#71b5ff;padding:18px;font:16px/1.6 "Roboto Mono";border-radius:0 0 12px 12px}
+    .controls{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:15px;margin-top:18px}
+    .controls button{padding:16px;border-radius:9px;border:1px solid #087dff;background:#05265b;color:#e8f4ff;font:700 14px "Roboto Mono";cursor:pointer;letter-spacing:1px}
+    .controls button:first-child{background:#087dff;color:white;box-shadow:0 0 22px rgba(0,125,255,.3)}
+    .controls button:hover{filter:brightness(1.25)}
+    .status{margin-top:18px;border-top:1px solid #075cc4;padding:14px 5px;display:flex;justify-content:space-between;color:#5595d3;font-size:12px}
+    .status b{color:#168cff}
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;background:#062b63;border:1px solid #168cff;color:white;padding:12px 20px;border-radius:7px;transition:.25s;box-shadow:0 0 20px rgba(0,112,255,.3)}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* --- history & settings panels --- */
+    .info-panel{margin-top:22px;border:1px solid #087dff;border-radius:12px;background:rgba(2,15,36,.92);box-shadow:inset 0 0 25px rgba(0,92,210,.1);overflow:hidden}
+    .info-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #064b9e;background:rgba(3,19,45,.9)}
+    .info-header strong{color:#62adff;letter-spacing:1px}
+    .info-header button{background:transparent;border:1px solid #087dff;color:#9ccfff;padding:6px 14px;border-radius:6px;font:600 12px "Roboto Mono";cursor:pointer}
+    .info-header button:hover{background:#05255a;color:white}
+    .info-body{padding:18px 20px;max-height:320px;overflow-y:auto}
+    .history-entry{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #0a2a4a;font-size:13px}
+    .history-entry:last-child{border-bottom:0}
+    .history-entry .preview{color:#71b5ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+    .history-entry .time{color:#508bc5;font-size:11px;margin-left:12px}
+    .history-entry .reuse{background:transparent;border:1px solid #087dff;color:#9ccfff;padding:4px 10px;border-radius:5px;font:600 11px "Roboto Mono";cursor:pointer}
+    .history-entry .reuse:hover{background:#05255a;color:white}
+    .setting-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #0a2a4a}
+    .setting-row:last-child{border-bottom:0}
+    .setting-label{color:#8db9ea;font-size:13px}
+    .setting-label small{display:block;color:#3f6d9c;font-size:11px;margin-top:4px}
+    .setting-row input[type="checkbox"]{appearance:none;width:44px;height:24px;background:#061c3c;border:1px solid #087dff;border-radius:24px;position:relative;cursor:pointer;transition:.2s;outline:none}
+    .setting-row input[type="checkbox"]::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;background:#508bc5;border-radius:50%;transition:.2s}
+    .setting-row input[type="checkbox"]:checked{background:#087dff;border-color:#168cff}
+    .setting-row input[type="checkbox"]:checked::after{left:23px;background:white}
+    .setting-row select{background:#020b1c;color:#71b5ff;border:1px solid #087dff;border-radius:5px;padding:6px 10px;font:12px "Roboto Mono";outline:none;cursor:pointer}
+    .empty-note{color:#3f6d9c;font-size:13px;text-align:center;padding:20px 0;font-style:italic}
+    ::-webkit-scrollbar{width:8px}
+    ::-webkit-scrollbar-track{background:#020b1c}
+    ::-webkit-scrollbar-thumb{background:#075cc4;border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:#087dff}
+
+    @media(max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}.workspace{grid-template-columns:1fr}.app{height:96vh}.hero h1{font-size:50px}.controls{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="logo">C</div>
+    <div class="brand">D-CRIP-TED</div>
+    <div class="badge">K / B → C &nbsp; | &nbsp; BLUE EDITION</div>
+    <div class="window"><button>−</button><button>□</button><button>×</button></div>
+  </header>
+  <div class="layout">
+    <nav>
+      <button class="active" onclick="showSection('home')" id="nav-home">⌂ &nbsp; HOME</button>
+      <button onclick="showSection('convert')" id="nav-convert">✎ &nbsp; CONVERT</button>
+      <button onclick="showSection('history')" id="nav-history">◷ &nbsp; HISTORY</button>
+      <button onclick="showSection('settings')" id="nav-settings">☷ &nbsp; SETTINGS</button>
+      <button onclick="showSection('about')" id="nav-about">ⓘ &nbsp; ABOUT</button>
+    </nav>
+    <main class="main" id="mainContent">
+      <!-- HOME section (hero + workspace + controls + status) -->
+      <div id="section-home">
+        <section class="hero">
+          <h1>D-Crip-Ted</h1>
+          <div class="rule">K / B → C</div>
+          <p>SAME WORDS. DIFFERENT VIBE.</p>
+        </section>
+        <section class="workspace">
+          <div class="panel">
+            <div class="panelhead"><strong>✎ INPUT</strong><span class="counter" id="inputCount">0 / 10,000</span></div>
+            <textarea id="input" maxlength="10000" placeholder="Enter your text here..."></textarea>
+          </div>
+          <div class="panel">
+            <div class="panelhead"><strong>▣ OUTPUT</strong><span class="counter" id="outputCount">0 / 10,000</span></div>
+            <textarea id="output" readonly placeholder="Converted text appears here..."></textarea>
+          </div>
+        </section>
+        <section class="controls">
+          <button onclick="convertText()">⚡ CONVERT TO C</button>
+          <button onclick="clearAll()">♻ CLEAR</button>
+          <button onclick="copyOutput()">▣ COPY OUTPUT</button>
+        </section>
+        <div class="status">
+          <span>STATUS: <b id="status">READY</b></span>
+          <span>TOTAL CONVERSIONS: <b id="total">0</b></span>
+          <span>K / B → C &nbsp; | &nbsp; KEEP IT BLUE</span>
+        </div>
+      </div>
+
+      <!-- HISTORY section (hidden by default) -->
+      <div id="section-history" style="display:none;">
+        <div class="info-panel">
+          <div class="info-header">
+            <strong>◷ CONVERSION HISTORY</strong>
+            <button onclick="clearHistory()">✕ CLEAR HISTORY</button>
+          </div>
+          <div class="info-body" id="historyList">
+            <!-- filled by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS section (hidden by default) -->
+      <div id="section-settings" style="display:none;">
+        <div class="info-panel">
+          <div class="info-header">
+            <strong>☷ SETTINGS</strong>
+            <button onclick="resetSettings()">↺ RESET DEFAULTS</button>
+          </div>
+          <div class="info-body">
+            <div class="setting-row">
+              <div class="setting-label">Auto-convert on type <small>instantly replace K/B as you type</small></div>
+              <input type="checkbox" id="setAutoConvert" onchange="toggleAutoConvert()">
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">Preserve original case <small>keep uppercase/lowercase pattern (e.g., k→c, K→C)</small></div>
+              <input type="checkbox" id="setPreserveCase" checked onchange="saveSettings()">
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">Show notifications <small>toast messages for actions</small></div>
+              <input type="checkbox" id="setShowToasts" checked onchange="saveSettings()">
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">Default conversion target <small>character to replace k/b with</small></div>
+              <select id="setTargetChar" onchange="saveSettings()">
+                <option value="C">C (uppercase)</option>
+                <option value="c">c (lowercase)</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label">Theme accent <small>visual only (blue edition)</small></div>
+              <select id="setAccent" onchange="saveSettings()">
+                <option value="#087dff">Classic Blue</option>
+                <option value="#168cff">Electric Blue</option>
+                <option value="#0055cc">Deep Blue</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABOUT section (hidden) -->
+      <div id="section-about" style="display:none;">
+        <div class="info-panel">
+          <div class="info-header"><strong>ⓘ ABOUT D-CRIP-TED</strong></div>
+          <div class="info-body">
+            <p style="color:#8db9ea;line-height:1.8;margin:0;">
+              <b style="color:#168cff;">D-Crip-Ted | Blue Edition</b> — a sleek text transformation tool.<br>
+              Replaces every <b>K</b> and <b>B</b> with <b>C</b>. Same words, different vibe.<br><br>
+              Built with pure HTML/CSS/JS. No frameworks. No tracking.<br>
+              <span style="color:#508bc5;">— K / B → C —</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  // ---------- STATE ----------
+  let total = 0;
+  let history = [];               // array of { input, output, time }
+  let autoConvert = false;       // setting
+
+  // DOM refs
+  const input = document.getElementById("input");
+  const output = document.getElementById("output");
+  const inputCount = document.getElementById("inputCount");
+  const outputCount = document.getElementById("outputCount");
+  const statusEl = document.getElementById("status");
+  const totalEl = document.getElementById("total");
+  const toast = document.getElementById("toast");
+  const historyList = document.getElementById("historyList");
+
+  // Settings checkboxes
+  const setAutoConvert = document.getElementById("setAutoConvert");
+  const setPreserveCase = document.getElementById("setPreserveCase");
+  const setShowToasts = document.getElementById("setShowToasts");
+  const setTargetChar = document.getElementById("setTargetChar");
+  const setAccent = document.getElementById("setAccent");
+
+  // ---------- INIT ----------
+  function init() {
+    // load settings from localStorage
+    loadSettings();
+    // load history from localStorage
+    loadHistory();
+    // update UI counters
+    updateCounters();
+    totalEl.textContent = total;
+    // auto-convert listener
+    input.addEventListener("input", handleInput);
+    input.addEventListener("keyup", () => {
+      if (autoConvert) {
+        // already handled in input, but just in case
+      }
+    });
+    // apply initial theme accent
+    applyAccent();
+  }
+
+  // ---------- SETTINGS ----------
+  function loadSettings() {
+    const saved = localStorage.getItem("dcrypted_settings");
+    if (saved) {
+      try {
+        const s = JSON.parse(saved);
+        if (s.autoConvert !== undefined) {
+          setAutoConvert.checked = s.autoConvert;
+          autoConvert = s.autoConvert;
+        }
+        if (s.preserveCase !== undefined) setPreserveCase.checked = s.preserveCase;
+        if (s.showToasts !== undefined) setShowToasts.checked = s.showToasts;
+        if (s.targetChar) setTargetChar.value = s.targetChar;
+        if (s.accent) setAccent.value = s.accent;
+      } catch (e) { /* ignore */ }
+    }
+    // apply autoConvert variable
+    autoConvert = setAutoConvert.checked;
+  }
+
+  function saveSettings() {
+    const s = {
+      autoConvert: setAutoConvert.checked,
+      preserveCase: setPreserveCase.checked,
+      showToasts: setShowToasts.checked,
+      targetChar: setTargetChar.value,
+      accent: setAccent.value
+    };
+    localStorage.setItem("dcrypted_settings", JSON.stringify(s));
+    autoConvert = s.autoConvert;
+    applyAccent();
+    // if showToasts changed, update flash behavior (handled by flash check)
+    flash("Settings saved.");
+  }
+
+  function resetSettings() {
+    setAutoConvert.checked = false;
+    setPreserveCase.checked = true;
+    setShowToasts.checked = true;
+    setTargetChar.value = "C";
+    setAccent.value = "#087dff";
+    autoConvert = false;
+    saveSettings();
+    applyAccent();
+    flash("Settings reset to defaults.");
+  }
+
+  function toggleAutoConvert() {
+    autoConvert = setAutoConvert.checked;
+    saveSettings();
+    flash(autoConvert ? "Auto-convert ON" : "Auto-convert OFF");
+  }
+
+  function applyAccent() {
+    const accent = setAccent.value || "#087dff";
+    // update borders, glows, etc. – simple: change the border of .app and panel
+    document.querySelectorAll(".app, .panel, .info-panel, .controls button").forEach(el => {
+      el.style.borderColor = accent;
+    });
+    // update main button background
+    const mainBtn = document.querySelector(".controls button:first-child");
+    if (mainBtn) mainBtn.style.background = accent;
+    // update nav active border color
+    document.querySelectorAll("nav button.active").forEach(el => {
+      el.style.borderColor = accent;
+      el.style.boxShadow = `0 0 18px ${accent}40`;
+    });
+  }
+
+  // ---------- CONVERSION ----------
+  function convertText(fromAuto = false) {
+    const raw = input.value;
+    const targetChar = setTargetChar.value; // "C" or "c"
+    let converted = "";
+
+    if (setPreserveCase.checked) {
+      // preserve case: K→target uppercase, k→target lowercase, B→target uppercase, b→target lowercase
+      converted = raw.replace(/[kKbB]/g, (match) => {
+        if (match === 'K' || match === 'B') return targetChar.toUpperCase();
+        return targetChar.toLowerCase();
+      });
+    } else {
+      // replace all with targetChar as-is
+      converted = raw.replace(/[kKbB]/g, targetChar);
+    }
+
+    output.value = converted;
+    updateCounters();
+
+    // only increment total and add to history if not from auto-convert (or we can still track, but let's track all conversions)
+    if (!fromAuto) {
+      total++;
+      totalEl.textContent = total;
+      statusEl.textContent = "CONVERTED";
+      addHistoryEntry(raw, converted);
+      if (setShowToasts.checked) flash("Conversion complete.");
+    } else {
+      // auto-convert: still update history but maybe don't flash every time
+      // we can add history only if length > 0 and different from last?
+      // Let's add history but avoid spamming.
+      if (raw.trim().length > 0) {
+        addHistoryEntry(raw, converted);
+      }
+    }
+    applyAccent(); // keep accent consistent
+  }
+
+  function handleInput() {
+    updateCounters();
+    if (autoConvert) {
+      // perform auto-convert on the fly (without incrementing total? we can increment but skip toast)
+      const raw = input.value;
+      const targetChar = setTargetChar.value;
+      let converted = "";
+      if (setPreserveCase.checked) {
+        converted = raw.replace(/[kKbB]/g, (match) => {
+          if (match === 'K' || match === 'B') return targetChar.toUpperCase();
+          return targetChar.toLowerCase();
+        });
+      } else {
+        converted = raw.replace(/[kKbB]/g, targetChar);
+      }
+      output.value = converted;
+      updateCounters();
+      // update total & history? let's not increment total on every keystroke, but we can log history only on explicit convert.
+      // So auto-convert does not increment total or add history (to avoid spam). Just updates output.
+    }
+  }
+
+  function updateCounters() {
+    inputCount.textContent = `${input.value.length.toLocaleString()} / 10,000`;
+    outputCount.textContent = `${output.value.length.toLocaleString()} / 10,000`;
+  }
+
+  function clearAll() {
+    input.value = "";
+    output.value = "";
+    updateCounters();
+    statusEl.textContent = "READY";
+    flash("Cleared.");
+  }
+
+  async function copyOutput() {
+    if (!output.value) {
+      if (setShowToasts.checked) flash("Nothing to copy.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(output.value);
+      if (setShowToasts.checked) flash("Output copied.");
+    } catch {
+      if (setShowToasts.checked) flash("Copy failed.");
+    }
+  }
+
+  // ---------- HISTORY ----------
+  function addHistoryEntry(inputText, outputText) {
+    // avoid empty entries
+    if (!inputText.trim()) return;
+    const entry = {
+      input: inputText.substring(0, 80) + (inputText.length > 80 ? "…" : ""),
+      output: outputText.substring(0, 80) + (outputText.length > 80 ? "…" : ""),
+      fullInput: inputText,   // keep full for reuse
+      time: new Date().toLocaleTimeString()
+    };
+    history.unshift(entry); // newest first
+    if (history.length > 50) history.pop(); // limit
+    saveHistory();
+    renderHistory();
+  }
+
+  function saveHistory() {
+    localStorage.setItem("dcrypted_history", JSON.stringify(history));
+  }
+
+  function loadHistory() {
+    const saved = localStorage.getItem("dcrypted_history");
+    if (saved) {
+      try {
+        history = JSON.parse(saved);
+      } catch (e) { history = []; }
+    }
+    renderHistory();
+  }
+
+  function renderHistory() {
+    if (!historyList) return;
+    if (history.length === 0) {
+      historyList.innerHTML = `<div class="empty-note">No conversions yet. Your history will appear here.</div>`;
+      return;
+    }
+    let html = "";
+    history.forEach((entry, index) => {
+      html += `
+        <div class="history-entry">
+          <span class="preview" title="${escapeHtml(entry.fullInput)}">${escapeHtml(entry.input)} → ${escapeHtml(entry.output)}</span>
+          <span>
+            <span class="time">${entry.time}</span>
+            <button class="reuse" onclick="reuseHistory(${index})">↺ USE</button>
+          </span>
+        </div>
+      `;
+    });
+    historyList.innerHTML = html;
+  }
+
+  function reuseHistory(index) {
+    const entry = history[index];
+    if (entry && entry.fullInput) {
+      input.value = entry.fullInput;
+      convertText(); // perform conversion and update output
+      flash("History entry loaded.");
+      // switch to home so user sees it
+      showSection('home');
+    }
+  }
+
+  function clearHistory() {
+    if (history.length === 0) {
+      flash("History already empty.");
+      return;
+    }
+    history = [];
+    saveHistory();
+    renderHistory();
+    flash("History cleared.");
+  }
+
+  // helper to escape HTML in previews
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ---------- UI NAVIGATION ----------
+  function showSection(section) {
+    // hide all sections
+    document.getElementById("section-home").style.display = "none";
+    document.getElementById("section-history").style.display = "none";
+    document.getElementById("section-settings").style.display = "none";
+    document.getElementById("section-about").style.display = "none";
+
+    // show selected
+    if (section === 'home') {
+      document.getElementById("section-home").style.display = "block";
+    } else if (section === 'history') {
+      document.getElementById("section-history").style.display = "block";
+      renderHistory(); // refresh
+    } else if (section === 'settings') {
+      document.getElementById("section-settings").style.display = "block";
+    } else if (section === 'about') {
+      document.getElementById("section-about").style.display = "block";
+    } else if (section === 'convert') {
+      // treat convert as home but focus input
+      document.getElementById("section-home").style.display = "block";
+      input.focus();
+    }
+
+    // update nav active class
+    document.querySelectorAll("nav button").forEach(btn => btn.classList.remove("active"));
+    const navBtn = document.getElementById(`nav-${section}`);
+    if (navBtn) navBtn.classList.add("active");
+    else if (section === 'convert') document.getElementById("nav-convert").classList.add("active");
+
+    applyAccent(); // keep theme consistent
+  }
+
+  // ---------- TOAST ----------
+  function flash(msg) {
+    if (!setShowToasts.checked) return;
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1600);
+  }
+
+  // ---------- EXPOSE GLOBALS ----------
+  window.convertText = convertText;
+  window.clearAll = clearAll;
+  window.copyOutput = copyOutput;
+  window.showSection = showSection;
+  window.clearHistory = clearHistory;
+  window.reuseHistory = reuseHistory;
+  window.toggleAutoConvert = toggleAutoConvert;
+  window.saveSettings = saveSettings;
+  window.resetSettings = resetSettings;
+  window.flash = flash;
+
+  // start
+  init();
+</script>
+</body>
+</html>
